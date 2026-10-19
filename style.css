@@ -46,3 +46,6 @@ footer{display:flex;align-items:center;justify-content:center;gap:16px;max-width
 /* Proper Twitch brand mark inside the existing purple social tile */
 .twitch .social-icon{color:#fff}
 .twitch-mark svg{display:block;width:29px;height:29px}
+/* Precisely center the YouTube play symbol within its red tile */
+.youtube-mark{display:grid;place-items:center}
+.youtube-mark svg{display:block;width:31px;height:31px}

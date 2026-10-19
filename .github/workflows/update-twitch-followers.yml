@@ -1,0 +1,45 @@
+name: Update Twitch follower count
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: twitch-follower-count
+  cancel-in-progress: true
+
+jobs:
+  update-followers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Fetch public Twitch follower count
+        env:
+          TWITCH_CHANNEL: frozican
+        run: |
+          set -euo pipefail
+          COUNT="$(curl --fail --silent --show-error --retry 2 "https://decapi.me/twitch/followcount/$TWITCH_CHANNEL" | tr -d '\r\n')"
+          if ! [[ "$COUNT" =~ ^[0-9]+$ ]]; then
+            echo "Follower-count provider returned an unexpected response."
+            exit 1
+          fi
+          printf '{"platform":"twitch","channel":"frozican","followers":%s,"updatedAt":"%s"}\n' "$COUNT" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > twitch-followers.json
+
+      - name: Commit updated count
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add twitch-followers.json
+          if git diff --cached --quiet; then
+            echo "Follower count has not changed."
+            exit 0
+          fi
+          git commit -m "Update Twitch follower count"
+          git push

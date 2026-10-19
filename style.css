@@ -43,3 +43,6 @@ footer{display:flex;align-items:center;justify-content:center;gap:16px;max-width
 @media(prefers-reduced-motion:reduce){
   .social .follower-count{animation:none;background-position:50% 50%}
 }
+/* Proper Twitch brand mark inside the existing purple social tile */
+.twitch .social-icon{color:#fff}
+.twitch-mark svg{display:block;width:29px;height:29px}

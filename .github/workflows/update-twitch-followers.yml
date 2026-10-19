@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/update-twitch-followers.yml"
       - "index.html"
+      - "youtube-followers.json"
+      - "twitch-followers.json"
   workflow_dispatch:
   schedule:
     - cron: "17 */6 * * *"
@@ -36,14 +38,20 @@ jobs:
           fi
           printf '{"platform":"twitch","channel":"frozican","followers":%s,"updatedAt":"%s"}\n' "$COUNT" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > twitch-followers.json
 
+      - name: Ensure YouTube data file exists
+        run: |
+          if [[ ! -f youtube-followers.json ]]; then
+            printf '{"platform":"youtube","channel":"frozicaaan","subscribers":null,"updatedAt":null}\\n' > youtube-followers.json
+          fi
+
       - name: Fetch YouTube subscriber count
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           set -euo pipefail
           if [[ -z "${YOUTUBE_API_KEY:-}" ]]; then
-            echo "::warning::YOUTUBE_API_KEY secret is not configured; keeping the previous YouTube count."
-            exit 0
+            echo "::error::YOUTUBE_API_KEY secret is missing or empty. Add it under Settings > Secrets and variables > Actions."
+            exit 1
           fi
           RESPONSE="$(curl --fail --silent --show-error --retry 2 --get "https://www.googleapis.com/youtube/v3/channels" --data-urlencode "part=statistics" --data-urlencode "forHandle=frozicaaan" --data-urlencode "key=$YOUTUBE_API_KEY")"
           COUNT="$(printf '%s' "$RESPONSE" | jq -er '.items[0].statistics.subscriberCount | numbers')"

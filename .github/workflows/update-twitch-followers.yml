@@ -1,4 +1,4 @@
-name: Update Twitch follower count
+name: Update social follower counts
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: twitch-follower-count
+  group: social-follower-counts
   cancel-in-progress: true
 
 jobs:
@@ -36,15 +36,32 @@ jobs:
           fi
           printf '{"platform":"twitch","channel":"frozican","followers":%s,"updatedAt":"%s"}\n' "$COUNT" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > twitch-followers.json
 
-      - name: Commit updated count
+      - name: Fetch YouTube subscriber count
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${YOUTUBE_API_KEY:-}" ]]; then
+            echo "::warning::YOUTUBE_API_KEY secret is not configured; keeping the previous YouTube count."
+            exit 0
+          fi
+          RESPONSE="$(curl --fail --silent --show-error --retry 2 --get "https://www.googleapis.com/youtube/v3/channels" --data-urlencode "part=statistics" --data-urlencode "forHandle=frozicaaan" --data-urlencode "key=$YOUTUBE_API_KEY")"
+          COUNT="$(printf '%s' "$RESPONSE" | jq -er '.items[0].statistics.subscriberCount | numbers')"
+          if ! [[ "$COUNT" =~ ^[0-9]+$ ]]; then
+            echo "YouTube API returned an unexpected subscriber count."
+            exit 1
+          fi
+          printf '{"platform":"youtube","channel":"frozicaaan","subscribers":%s,"updatedAt":"%s"}\n' "$COUNT" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > youtube-followers.json
+
+      - name: Commit updated counts
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add twitch-followers.json
+          git add twitch-followers.json youtube-followers.json
           if git diff --cached --quiet; then
-            echo "Follower count has not changed."
+            echo "Follower counts have not changed."
             exit 0
           fi
-          git commit -m "Update Twitch follower count"
+          git commit -m "Update social follower counts"
           git push

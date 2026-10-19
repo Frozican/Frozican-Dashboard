@@ -53,10 +53,14 @@ jobs:
             echo "::error::YOUTUBE_API_KEY secret is missing or empty. Add it under Settings > Secrets and variables > Actions."
             exit 1
           fi
-          RESPONSE="$(curl --fail --silent --show-error --retry 2 --get "https://www.googleapis.com/youtube/v3/channels" --data-urlencode "part=statistics" --data-urlencode "forHandle=frozicaaan" --data-urlencode "key=$YOUTUBE_API_KEY")"
-          COUNT="$(printf '%s' "$RESPONSE" | jq -er '.items[0].statistics.subscriberCount | numbers')"
+          RESPONSE="$(curl --silent --show-error --retry 2 --get "https://www.googleapis.com/youtube/v3/channels" --data-urlencode "part=statistics" --data-urlencode "forHandle=frozicaaan" --data-urlencode "key=$YOUTUBE_API_KEY")"
+          if ERROR_MESSAGE="$(printf '%s' "$RESPONSE" | jq -er '.error.message // empty')" && [[ -n "$ERROR_MESSAGE" ]]; then
+            echo "::error::YouTube API error: $ERROR_MESSAGE"
+            exit 1
+          fi
+          COUNT="$(printf '%s' "$RESPONSE" | jq -er '.items[0].statistics.subscriberCount // empty')"
           if ! [[ "$COUNT" =~ ^[0-9]+$ ]]; then
-            echo "YouTube API returned an unexpected subscriber count."
+            echo "::error::YouTube returned no subscriber count for handle frozicaaan. Check the channel handle and API key restrictions."
             exit 1
           fi
           printf '{"platform":"youtube","channel":"frozicaaan","subscribers":%s,"updatedAt":"%s"}\n' "$COUNT" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > youtube-followers.json

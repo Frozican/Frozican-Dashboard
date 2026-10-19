@@ -14,3 +14,32 @@
 footer{display:flex;align-items:center;justify-content:center;gap:16px;max-width:380px;margin:28px auto 0;color:#829bc2;font-size:.82rem}footer p{white-space:nowrap}footer span{max-width:110px}
 @media(max-width:780px){.featured{grid-template-columns:100px minmax(0,1fr);gap:18px;padding:20px}.project-icon{height:100px;font-size:3rem}.systems{grid-column:1/-1;border-left:0;border-top:1px solid #21395d;padding:18px 0 0;grid-template-columns:repeat(3,1fr);gap:10px}.systems>div{align-items:flex-start}.systems>div>span{font-size:1.1rem}.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.page{width:calc(100% - 28px);padding-top:34px}.hero{padding-bottom:28px}.eyebrow{font-size:.67rem}.intro{font-size:.92rem}.social-grid{gap:10px}.social{padding:18px 8px}.featured{grid-template-columns:1fr;padding:18px}.project-icon{display:none}.project-copy h2{font-size:1.75rem}.systems{grid-template-columns:1fr 1fr}.systems>div:last-child{grid-column:1/-1}.info-grid{gap:10px}.info-card{padding:15px;min-height:0}.info-card p{font-size:.8rem}}
+
+/* Twitch follower count: bolder type with a continuously moving neon gradient */
+.social strong{font-weight:800;letter-spacing:-.015em}
+.social small{font-weight:500}
+.social .follower-count{
+  display:inline-block;
+  margin-top:10px;
+  font-size:clamp(.92rem,2.5vw,1.08rem);
+  line-height:1.35;
+  font-weight:800;
+  letter-spacing:.015em;
+  color:transparent;
+  background:linear-gradient(100deg,#46eaff 0%,#5a7dff 24%,#c16bff 49%,#ff65ce 68%,#46eaff 100%);
+  background-size:280% 100%;
+  background-position:0% 50%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  animation:follower-gradient-flow 4s ease-in-out infinite;
+  filter:drop-shadow(0 0 9px #6c68ff55);
+}
+.social.twitch .follower-count{font-size:1.02rem}
+@keyframes follower-gradient-flow{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@media(prefers-reduced-motion:reduce){
+  .social .follower-count{animation:none;background-position:50% 50%}
+}

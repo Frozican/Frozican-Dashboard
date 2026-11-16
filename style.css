@@ -49,3 +49,9 @@ footer{display:flex;align-items:center;justify-content:center;gap:16px;max-width
 /* Precisely center the YouTube play symbol within its red tile */
 .youtube-mark{display:grid;place-items:center}
 .youtube-mark svg{display:block;width:31px;height:31px}
+
+/* OpenTAS64 project card accent */
+.opentas64-project{border-color:#287b78;background:linear-gradient(115deg,#0b252d,#081020 75%);box-shadow:0 0 0 1px #25b9a522,inset 0 0 40px #0e6c6812}
+.opentas64-project .project-icon{border-color:#216d6b;background:radial-gradient(circle,#14504f,#091b28 70%)}
+.opentas64-project .tag{background:#12645f}
+.opentas64-project .primary-button{background:linear-gradient(110deg,#168d83,#176d80)}
